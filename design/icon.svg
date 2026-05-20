@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Marklens app icon.
+    Geometry built around 1024×1024. A rounded-rect background (Apple superellipse
+    approximation via cubic Béziers) sits behind a stylized "M" whose strokes
+    terminate in subtle ▼ carets — a nod to markdown's heading/list arrows
+    without spelling out "MD". Tuned for clarity at 32×32.
+  -->
+  <defs>
+    <!-- macOS Pro blue gradient, top-left lighter to bottom-right deeper. -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#3aa0ff"/>
+      <stop offset="0.55" stop-color="#0a84ff"/>
+      <stop offset="1"   stop-color="#0050d0"/>
+    </linearGradient>
+
+    <!-- Glyph fill: warm white with a faint vertical sheen for depth. -->
+    <linearGradient id="glyphGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef4ff"/>
+    </linearGradient>
+
+    <!-- Soft inner highlight along the top edge of the background. -->
+    <linearGradient id="topGloss" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0"   stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Drop shadow for the glyph — sits inside the rounded square. -->
+    <filter id="glyphShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14"/>
+      <feOffset dx="0" dy="10" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.18"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Soft clip path matching the background, so the gloss can't overflow. -->
+    <clipPath id="bgClip">
+      <rect x="0" y="0" width="1024" height="1024" rx="225" ry="225"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background plate -->
+  <rect x="0" y="0" width="1024" height="1024" rx="225" ry="225" fill="url(#bgGrad)"/>
+
+  <!-- Top gloss inside the rounded square -->
+  <g clip-path="url(#bgClip)">
+    <rect x="0" y="0" width="1024" height="430" fill="url(#topGloss)"/>
+  </g>
+
+  <!--
+    The "M" glyph.
+    Built from a single filled path: four diagonal legs that meet at the top,
+    with the two inner vertices nudged downward into ▼ tips. Stroke thickness
+    is kept generous (~110px) so the form holds up at small sizes.
+    Anchors (in icon coords, origin top-left):
+      A (210, 250)  outer-top-left
+      B (370, 250)  outer-top-left-bottom edge for stroke width
+      C (438, 720)  inner-V left bottom (▼ tip 1)
+      D (512, 380)  apex
+      E (586, 720)  inner-V right bottom (▼ tip 2)
+      F (654, 250)  outer-top-right (top edge)
+      G (814, 250)  outer-top-right
+      H (760, 820)  bottom-right inside
+      I (264, 820)  bottom-left inside
+    The polygon is filled, then we knockout the inner triangular hole
+    between C-D-E to keep the M open.
+  -->
+  <g filter="url(#glyphShadow)">
+    <!-- Outer M shape (filled) -->
+    <path fill="url(#glyphGrad)" fill-rule="evenodd" d="
+      M 210 250
+      L 372 250
+      L 512 640
+      L 652 250
+      L 814 250
+      L 814 820
+      L 690 820
+      L 690 470
+      L 558 820
+      L 466 820
+      L 334 470
+      L 334 820
+      L 210 820
+      Z" />
+
+    <!-- Two small ▼ caret tips at the bottom of the inner valleys —
+         a subtle Markdown nod. -->
+    <path fill="url(#glyphGrad)" d="
+      M 442 798
+      L 522 798
+      L 482 858
+      Z"/>
+    <path fill="url(#glyphGrad)" d="
+      M 634 798
+      L 714 798
+      L 674 858
+      Z"/>
+  </g>
+</svg>

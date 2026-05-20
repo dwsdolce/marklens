@@ -33,6 +33,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Marklens/Marklens.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_MACCATALYST: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     dependencies:
       - package: MarklensCore
         product: MarklensCore
