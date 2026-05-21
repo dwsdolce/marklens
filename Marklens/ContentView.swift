@@ -7,6 +7,7 @@ struct ContentView: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @State private var rendered: RenderedDocument?
+    @StateObject private var exportController = ExportController()
 
     var body: some View {
         Group {
@@ -14,7 +15,8 @@ struct ContentView: View {
                 MarkdownWebView(
                     rendered: rendered,
                     dark: colorScheme == .dark,
-                    baseURL: WebResources.bundleURL
+                    baseURL: WebResources.bundleURL,
+                    exportController: exportController
                 )
             } else {
                 Color.clear
@@ -22,7 +24,7 @@ struct ContentView: View {
         }
         .frame(minWidth: 480, minHeight: 360)
         .navigationTitle(fileURL?.deletingPathExtension().lastPathComponent ?? "Markdown")
-        .toolbar { Toolbar(fileURL: fileURL) }
+        .toolbar { Toolbar(fileURL: fileURL, exportController: exportController) }
         .task(id: document.source) {
             await render()
         }
@@ -31,6 +33,7 @@ struct ContentView: View {
     @MainActor
     private func render() async {
         let source = document.source
+        exportController.isReady = false
         let result = await Task.detached(priority: .userInitiated) {
             MarkdownRenderer().renderHTML(from: source)
         }.value

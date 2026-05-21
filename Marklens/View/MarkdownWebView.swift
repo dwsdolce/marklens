@@ -12,6 +12,7 @@ struct MarkdownWebView: PlatformViewRepresentable {
     let rendered: RenderedDocument
     let dark: Bool
     let baseURL: URL?
+    let exportController: ExportController
 
     #if os(macOS)
     func makeNSView(context: Context) -> WKWebView { makeWebView(context: context) }
@@ -31,6 +32,8 @@ struct MarkdownWebView: PlatformViewRepresentable {
 
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
+        context.coordinator.exportController = exportController
+        exportController.webView = webView
         // Enable Web Inspector (Cmd+Opt+I) so devs can debug the rendered page.
         if webView.responds(to: Selector(("setInspectable:"))) {
             webView.perform(Selector(("setInspectable:")), with: true)
@@ -81,6 +84,11 @@ struct MarkdownWebView: PlatformViewRepresentable {
         var lastBody: String = ""
         var lastMermaid: Bool = false
         var lastDark: Bool = false
+        weak var exportController: ExportController?
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            Task { @MainActor in self.exportController?.isReady = true }
+        }
 
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
