@@ -56,21 +56,11 @@
 
   <!--
     The "M" glyph.
-    Built from a single filled path: four diagonal legs that meet at the top,
-    with the two inner vertices nudged downward into ▼ tips. Stroke thickness
-    is kept generous (~110px) so the form holds up at small sizes.
-    Anchors (in icon coords, origin top-left):
-      A (210, 250)  outer-top-left
-      B (370, 250)  outer-top-left-bottom edge for stroke width
-      C (438, 720)  inner-V left bottom (▼ tip 1)
-      D (512, 380)  apex
-      E (586, 720)  inner-V right bottom (▼ tip 2)
-      F (654, 250)  outer-top-right (top edge)
-      G (814, 250)  outer-top-right
-      H (760, 820)  bottom-right inside
-      I (264, 820)  bottom-left inside
-    The polygon is filled, then we knockout the inner triangular hole
-    between C-D-E to keep the M open.
+    A filled polygon: outer legs at x∈[210,334] and x∈[690,814]; central V with
+    apex at (512, 640); inner cutouts whose tips meet the M's top edge inset.
+    Two ▼ carets hang from the outer feet (centered at x=272 and x=752) — a
+    subtle Markdown nod. Stroke thickness is generous (~110px) so the form
+    holds up at small sizes.
   -->
   <g filter="url(#glyphShadow)">
     <!-- Outer M shape (filled) -->
@@ -90,17 +80,17 @@
       L 210 820
       Z" />
 
-    <!-- Two small ▼ caret tips at the bottom of the inner valleys —
-         a subtle Markdown nod. -->
+    <!-- Two small ▼ caret tips centered on the M's outer feet —
+         symmetric around x=512, a subtle Markdown nod. -->
     <path fill="url(#glyphGrad)" d="
-      M 442 798
-      L 522 798
-      L 482 858
+      M 232 838
+      L 312 838
+      L 272 898
       Z"/>
     <path fill="url(#glyphGrad)" d="
-      M 634 798
-      L 714 798
-      L 674 858
+      M 712 838
+      L 792 838
+      L 752 898
       Z"/>
   </g>
 </svg>
