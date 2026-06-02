@@ -3,7 +3,7 @@ options:
   bundleIdPrefix: solutions.ddj
   deploymentTarget:
     macOS: "14.0"
-    iOS: "17.0"
+    iOS: "18.0"
   developmentLanguage: en
   createIntermediateGroups: true
 
@@ -19,6 +19,7 @@ settings:
     GENERATE_INFOPLIST_FILE: NO
     ENABLE_HARDENED_RUNTIME: YES
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 997P2237XV
 
 targets:
   Marklens:
