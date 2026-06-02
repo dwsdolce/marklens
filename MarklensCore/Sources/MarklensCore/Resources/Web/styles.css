@@ -50,6 +50,11 @@ article#content {
 
 @media (max-width: 600px) {
     article#content { padding: 24px 18px 64px; }
+    /* Slightly smaller headings on phone-width so a long h1 wraps
+       gracefully instead of dominating the column. */
+    h1 { font-size: 1.7em; }
+    h2 { font-size: 1.35em; }
+    h3 { font-size: 1.15em; }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -87,6 +92,14 @@ li.task-list-item, li:has(> input[type="checkbox"]) {
 li input[type="checkbox"] {
     margin-right: 0.5em;
     transform: translateY(1px);
+}
+/* swift-markdown wraps task item content in <p>; keep it inline so the
+   checkbox and text share a line. Only the first paragraph collapses —
+   if a task item has a continuation paragraph, that still breaks. */
+li.task-list-item > p:first-of-type,
+li:has(> input[type="checkbox"]) > p:first-of-type {
+    display: inline;
+    margin: 0;
 }
 
 blockquote {

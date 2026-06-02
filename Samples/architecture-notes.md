@@ -21,12 +21,12 @@ with an LRU policy and a short TTL.
 
 ```mermaid
 flowchart LR
-    Client -->|GET /catalog| API
-    API -->|key=hash(q,filters)| Redis
+    Client -->|"GET /catalog"| API
+    API -->|"key = hash(q, filters)"| Redis
     Redis -->|hit| API
     Redis -->|miss| DB[(PostgreSQL)]
     DB --> API
-    API -->|set + ttl| Redis
+    API -->|"set + ttl"| Redis
     API --> Client
 ```
 

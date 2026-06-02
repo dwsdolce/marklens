@@ -22,7 +22,9 @@ struct ContentView: View {
                 Color.clear
             }
         }
+        #if os(macOS)
         .frame(minWidth: 480, minHeight: 360)
+        #endif
         .navigationTitle(fileURL?.deletingPathExtension().lastPathComponent ?? "Markdown")
         .toolbar { Toolbar(fileURL: fileURL, controller: webController) }
         .task(id: document.source) {

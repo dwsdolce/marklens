@@ -5,7 +5,7 @@ let package = Package(
     name: "MarklensCore",
     platforms: [
         .macOS(.v14),
-        .iOS(.v17),
+        .iOS("18.0"),
     ],
     products: [
         .library(name: "MarklensCore", targets: ["MarklensCore"]),

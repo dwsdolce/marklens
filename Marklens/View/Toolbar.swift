@@ -3,6 +3,8 @@ import UniformTypeIdentifiers
 
 #if os(macOS)
 import AppKit
+#else
+import UIKit
 #endif
 
 struct Toolbar: ToolbarContent {
@@ -71,15 +73,12 @@ struct Toolbar: ToolbarContent {
             .disabled(!controller.isReady)
         }
         ToolbarItem(placement: .primaryAction) {
-            if let url = iOSExportURL {
-                ShareLink(item: url, preview: SharePreview(url.lastPathComponent)) {
-                    Label("Share PDF", systemImage: "square.and.arrow.up")
-                }
-            } else if let fileURL {
-                ShareLink(item: fileURL) {
-                    Label("Share file", systemImage: "square.and.arrow.up")
-                }
+            Button {
+                Task { await presentShareSheet() }
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
             }
+            .disabled(fileURL == nil && iOSExportURL == nil)
         }
         #endif
     }
@@ -131,11 +130,72 @@ struct Toolbar: ToolbarContent {
                 .appendingPathComponent(suggestedName)
             try data.write(to: url, options: .atomic)
             iOSExportURL = url
+            // Hand the freshly-exported PDF straight to the share sheet so
+            // tapping Export-as-PDF surfaces something useful in one tap.
+            presentActivity(for: url)
         } catch {
-            // On iPad the toolbar can't show alerts directly; surface the
-            // failure by leaving iOSExportURL nil so the share button doesn't appear.
             iOSExportURL = nil
         }
+    }
+
+    /// Presents the system share sheet with the most relevant item:
+    /// the just-exported PDF if one exists, otherwise a copy of the
+    /// original markdown file made in our own tmp dir (so the system
+    /// share sheet doesn't trip on the security-scoped DocumentGroup URL,
+    /// which is why `ShareLink(item: fileURL)` silently no-ops).
+    @MainActor
+    private func presentShareSheet() async {
+        var url: URL?
+        if let pdf = iOSExportURL {
+            url = pdf
+        } else if let original = fileURL {
+            url = await copyForSharing(original)
+        }
+        guard let url else { return }
+        presentActivity(for: url)
+    }
+
+    @MainActor
+    private func copyForSharing(_ source: URL) async -> URL? {
+        let didStart = source.startAccessingSecurityScopedResource()
+        defer { if didStart { source.stopAccessingSecurityScopedResource() } }
+        let dst = FileManager.default.temporaryDirectory
+            .appendingPathComponent(source.lastPathComponent)
+        do {
+            if FileManager.default.fileExists(atPath: dst.path) {
+                try FileManager.default.removeItem(at: dst)
+            }
+            try FileManager.default.copyItem(at: source, to: dst)
+            return dst
+        } catch {
+            return nil
+        }
+    }
+
+    @MainActor
+    private func presentActivity(for url: URL) {
+        let av = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        guard let scene = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .first(where: { $0.activationState == .foregroundActive }),
+              let root = scene.windows.first(where: \.isKeyWindow)?.rootViewController
+        else { return }
+        // Walk to the currently-presented controller so we don't try to
+        // present on something that already has a sheet up.
+        var presenter: UIViewController = root
+        while let next = presenter.presentedViewController { presenter = next }
+        // iPad needs a popover anchor — anchor to the top-right of the
+        // presenter's view so it points at the toolbar button.
+        if let popover = av.popoverPresentationController {
+            popover.sourceView = presenter.view
+            popover.sourceRect = CGRect(
+                x: presenter.view.bounds.maxX - 60,
+                y: presenter.view.bounds.minY + 60,
+                width: 1, height: 1
+            )
+            popover.permittedArrowDirections = .up
+        }
+        presenter.present(av, animated: true)
     }
     #endif
 }

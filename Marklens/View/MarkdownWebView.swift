@@ -44,6 +44,11 @@ struct MarkdownWebView: PlatformViewRepresentable {
         #else
         webView.isOpaque = false
         webView.backgroundColor = .clear
+        // Stop UIScrollView from auto-adjusting content insets for the safe
+        // area / status bar — that's the SwiftUI parent's job. With
+        // .automatic we sometimes saw a small horizontal scroll offset on
+        // iPhone that made content look cropped on the left.
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
         #endif
         return webView
     }
