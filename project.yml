@@ -1,6 +1,6 @@
 name: Marklens
 options:
-  bundleIdPrefix: com.marklens
+  bundleIdPrefix: solutions.ddj
   deploymentTarget:
     macOS: "14.0"
     iOS: "17.0"
@@ -28,7 +28,7 @@ targets:
       - path: Marklens
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.marklens.app
+        PRODUCT_BUNDLE_IDENTIFIER: solutions.ddj.marklens
         INFOPLIST_FILE: Marklens/Info.plist
         CODE_SIGN_ENTITLEMENTS: Marklens/Marklens.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -48,7 +48,7 @@ targets:
       - path: MarklensQuickLook
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.marklens.app.QuickLook
+        PRODUCT_BUNDLE_IDENTIFIER: solutions.ddj.marklens.QuickLook
         INFOPLIST_FILE: MarklensQuickLook/Info.plist
         CODE_SIGN_ENTITLEMENTS: MarklensQuickLook/MarklensQuickLook.entitlements
     dependencies:

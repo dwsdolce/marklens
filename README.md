@@ -105,7 +105,7 @@ them here so future contributors don't relive them.
   the array form `platformFilters = (macos,)`. `scripts/generate-project.sh`
   patches both occurrences.
 - **Quick Look NSExtension priority is fragile.** Ad-hoc-signed dev builds need a
-  manual `pluginkit -e use -i com.marklens.app.QuickLook` election to win over
+  manual `pluginkit -e use -i solutions.ddj.marklens.QuickLook` election to win over
   the system's built-in plain-text preview for `.md`.
 
 ## Asset versions
