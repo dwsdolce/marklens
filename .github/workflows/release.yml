@@ -1,0 +1,60 @@
+name: Release
+
+# Fires when a GitHub Release is published. Attaches the macOS build CI
+# already produced for the current tip of `main` (see the "Release snapshot"
+# steps in ci.yml) — it does not rebuild, so what ships is exactly what CI
+# validated. iOS is untouched here: iOS releases are still built and
+# submitted by hand via Xcode Organizer.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  attach-macos-build:
+    name: Attach latest main macOS build to release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Deliberately not `gh run list --status success`: ci.yml's build-macos
+      # and build-ios are independent jobs now, so a run's *overall* status is
+      # "failure" whenever iOS fails even if macOS succeeded and uploaded its
+      # artifact fine. Looking up the artifact directly makes the release
+      # depend only on the macOS build, matching the separated pipelines.
+      - name: Find latest macOS build artifact on main
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" \
+            --jq '[.artifacts[] | select(.name == "marklens-macos-release" and .expired == false and .workflow_run.head_branch == "main")] | sort_by(.created_at) | (last // empty) | .workflow_run.id')
+
+          if [ -z "$run_id" ]; then
+            echo "::error::No marklens-macos-release artifact found for main — nothing to attach to this release. Push to main (or re-run the build-macos job) and re-publish the release."
+            exit 1
+          fi
+
+          echo "Using CI run $run_id"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Download macOS build artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download "${{ steps.find.outputs.run_id }}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name marklens-macos-release \
+            --dir dist
+
+      - name: Attach to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            dist/Marklens-macOS.zip \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
