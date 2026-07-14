@@ -10,6 +10,8 @@ struct MarklensApp: App {
             CommandGroup(replacing: .newItem) {}  // viewer only — no "New"
             #if os(macOS)
             CommandGroup(after: .newItem) {
+                FolderAccessMenuCommands()
+                Divider()
                 ReloadMenuCommands()
             }
             CommandGroup(after: .textEditing) {
@@ -48,6 +50,32 @@ private struct HelpMenuCommands: View {
             openWindow(id: "marklens-help")
         }
         .keyboardShortcut("?", modifiers: .command)
+    }
+}
+
+/// Sits under File, next to Open — because that's what it is to the user:
+/// "here's where my documents live", not "grant a permission". One folder
+/// covers every document, image, and link beneath it, for good.
+private struct FolderAccessMenuCommands: View {
+    @ObservedObject private var access = LinkFolderAccess.shared
+
+    var body: some View {
+        Button("Allow Access to Folder…") {
+            LinkFolderAccess.shared.addFolder()
+        }
+        .keyboardShortcut("o", modifiers: [.command, .shift])
+
+        Menu("Allowed Folders") {
+            if access.grantedFolders.isEmpty {
+                Text("None yet")
+            } else {
+                ForEach(access.grantedFolders, id: \.self) { folder in
+                    Button("Forget “\(folder.lastPathComponent)”") {
+                        LinkFolderAccess.shared.removeFolder(folder)
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -13,13 +13,26 @@ public struct MarkdownRenderer {
         let rawHTML = HTMLFormatter.format(document, options: [.parseAsides])
         let body = MermaidPostProcessor.transform(rawHTML)
 
-        return RenderedDocument(body: body, containsMermaid: detector.found)
+        return RenderedDocument(
+            body: body,
+            containsMermaid: detector.found,
+            referencesLocalImages: DocumentResources.referencesRelativeSources(in: body)
+        )
     }
 }
 
 public struct RenderedDocument {
     public let body: String
     public let containsMermaid: Bool
+    /// The document embeds images that live beside it on disk — which a
+    /// sandboxed app can't read without a folder grant.
+    public let referencesLocalImages: Bool
+
+    public init(body: String, containsMermaid: Bool, referencesLocalImages: Bool = false) {
+        self.body = body
+        self.containsMermaid = containsMermaid
+        self.referencesLocalImages = referencesLocalImages
+    }
 }
 
 private struct MermaidDetector: MarkupWalker {

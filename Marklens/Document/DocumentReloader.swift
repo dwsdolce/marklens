@@ -38,6 +38,17 @@ final class DocumentReloader: ObservableObject {
         if isAccessingScope { fileURL?.stopAccessingSecurityScopedResource() }
     }
 
+    /// Show `fileURL`: rewire the watcher to it and pull in its contents.
+    ///
+    /// Called for the window's own document and — on iOS, where following a
+    /// link swaps content in place — for whatever file the navigator moved to.
+    /// A no-op when that file is already the one on screen.
+    func show(_ fileURL: URL?) {
+        guard fileURL != self.fileURL else { return }
+        configure(fileURL: fileURL)
+        reload()
+    }
+
     /// Point the reloader at the document's file. Safe to call repeatedly with
     /// the same URL (a no-op). Opens security-scoped access that lasts for the
     /// window's lifetime so both the watcher's `open()` and disk reads succeed

@@ -12,6 +12,7 @@ struct Toolbar: ToolbarContent {
     @ObservedObject var controller: WebViewController
     @ObservedObject var findController: FindController
     @ObservedObject var reloader: DocumentReloader
+    @ObservedObject var navigator: DocumentNavigator
 
     @State private var isExporting = false
 
@@ -76,6 +77,22 @@ struct Toolbar: ToolbarContent {
             reloadButton
         }
         #else
+        // Following a link swaps the file in place (there's no second window on
+        // iPhone), so this is how you get back to the document you came from.
+        // It sits with the other actions rather than in the leading slot: that
+        // one already holds DocumentGroup's own back chevron (out to the file
+        // browser), and two back-chevrons side by side read as a mistake. The
+        // u-turn glyph also says "back to the previous document" rather than
+        // "up a level", which is the distinction that matters here.
+        ToolbarItem(placement: .primaryAction) {
+            if navigator.canGoBack {
+                Button {
+                    navigator.goBack()
+                } label: {
+                    Label("Back to Previous Document", systemImage: "arrow.uturn.backward")
+                }
+            }
+        }
         ToolbarItem(placement: .primaryAction) {
             Button {
                 findController.show()
@@ -84,6 +101,17 @@ struct Toolbar: ToolbarContent {
             }
             .disabled(!controller.isReady)
             .keyboardShortcut("f", modifiers: .command)
+        }
+        // iOS has no menu bar, so the "here's where my documents live" grant
+        // lives here. Browsing to a folder deliberately is also the only way
+        // this works on iOS: the picker refuses to reveal a folder we have no
+        // access to, so it can never be pre-pointed for us.
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                LinkFolderAccess.shared.addFolder()
+            } label: {
+                Label("Allow Access to Folder…", systemImage: "folder.badge.plus")
+            }
         }
         ToolbarItem(placement: .primaryAction) {
             exportMarkdownButton
